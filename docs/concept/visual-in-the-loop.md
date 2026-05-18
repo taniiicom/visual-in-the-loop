@@ -5,11 +5,14 @@
 - claude code や codex などのコーディングエージェントにおける plan agent/plan mode や、spec-kit で、plan を作ってもらうのは良いんですが、そのplanを人がレビューするのが大変
 - なので、plan の是非をユーザに尋ねたり、clarifyや質問エージェントなど、ユーザに決定を求めるタイミングで、別途 "nano banana 2"などを呼び出して1枚図を作成する agent skills を作りたい
 
-- smoke test
+### smoke test
+
 - スモークテストで使う plan の原文を file:///Users/taniiicom/projects/\_libraries/skills-visual-in-the-loop/docs/plan/visual-in-the-loop.md に
 - どういうskills かが，画像で表示されて，チュートリアル代わりにもなるのでちょうど良いと思います ^^
 
-- 環境変数
+### 環境変数
+
+- VITL 有効/無効
 - API key
 - AI プロバイダ
   e.g. Gemini, VertexAI, OpenAI, Azure など
@@ -19,6 +22,10 @@
   e.g. auto, など
 - トリガー (複数選択可)
   e.g. すべて, plan ...
+
+- VITL_TRIGGER の引数が万一指定されなかったときは，これまでと同じようにとりあえず生成
+- VITL_DISPLAY で，指定された表示が使えないときは auto にフォールバック
+  のようにフェイルセーフにしておく
 
 ## clarify
 
