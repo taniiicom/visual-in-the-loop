@@ -98,6 +98,64 @@ node --version    # should print v18 or higher
 You don't need all of these. The skill falls back through them automatically
 and picks the first one that's available in your environment.
 
+## Configuration
+
+All settings are environment variables. Put them in your shell, or in
+`~/.claude/settings.json` under the `env` key so they apply to every Claude
+Code session:
+
+```jsonc
+// ~/.claude/settings.json
+{
+  "env": {
+    "GEMINI_API_KEY": "AIza...",
+    "VITL_PROVIDER": "gemini",
+    "VITL_MODEL": "gemini-3-pro-image-preview",
+    "VITL_DISPLAY": "auto",
+    "VITL_TRIGGER": "all"
+  }
+}
+```
+
+For project-only overrides, use the same `env` block in
+`<project>/.claude/settings.local.json` (which is gitignored by default).
+
+### All variables
+
+| Variable | Values | Default | Purpose |
+|---|---|---|---|
+| `VITL_ENABLED` | `1` / `0` (and `true`/`false`/`yes`/`no`/`on`/`off`) | unset = on | Master switch. Only `0`/`false`/`no`/`off` disable; everything else stays on. |
+| `VITL_PROVIDER` | `gemini` / `vertexai` / `openai` / `azure` | `gemini` | Which API to call. |
+| `VITL_MODEL` | provider-specific id | provider default | E.g. `gemini-2.5-flash-image` for free-tier Gemini. |
+| `VITL_DISPLAY` | `auto` / `tmux` / `vscode` / `open` / `none` | `auto` | Force a display path, or `none` to suppress. Unusable choices fall back to `auto`. |
+| `VITL_TRIGGER` | comma-separated (`plan,clarify,decision`) or `all` | `all` | Which `--trigger <type>` invocations actually fire generation. |
+
+### Per-provider keys
+
+| `VITL_PROVIDER` | Required env vars | Default `VITL_MODEL` |
+|---|---|---|
+| `gemini` | `GEMINI_API_KEY` *or* `GOOGLE_API_KEY` | `gemini-3-pro-image-preview` |
+| `vertexai` | `GOOGLE_APPLICATION_CREDENTIALS` + `VITL_VERTEX_PROJECT` + `VITL_VERTEX_LOCATION` | `gemini-3-pro-image-preview` |
+| `openai` | `OPENAI_API_KEY` | `gpt-image-1` |
+| `azure` | `AZURE_OPENAI_API_KEY` + `AZURE_OPENAI_ENDPOINT` + `AZURE_OPENAI_DEPLOYMENT` | deployment-specific |
+
+> Only the Gemini provider is fully implemented today. Vertex AI / OpenAI /
+> Azure are on the roadmap — see [Roadmap](#roadmap).
+
+### Fail-safes
+
+The skill is deliberately permissive:
+
+- If the agent forgets to pass `--trigger <type>` while `VITL_TRIGGER` is
+  restrictive, the skill **still generates** (never miss a visualization
+  because the agent forgot a flag).
+- If `VITL_DISPLAY` is set to a path that isn't usable in your environment
+  (e.g. `tmux` without `chafa`), the skill warns and falls back to `auto`.
+- If `VITL_ENABLED` is set to something that isn't a recognized false value,
+  the skill stays enabled.
+
+Goal: nothing the user types into config should silently break the conversation.
+
 ## Try it
 
 After installing, smoke-test it with the bundled sample plan — the image you
@@ -175,6 +233,10 @@ skill falls through to `open` / `xdg-open`.
 
 ## Roadmap
 
+- **Additional providers** — `providers/openai.mjs`, `providers/vertexai.mjs`,
+  `providers/azure.mjs`. The Gemini provider works today; the others are
+  scaffolded for and the `VITL_PROVIDER` env var is wired up, but the modules
+  are not yet implemented.
 - `references/hook-example.md` — once Claude Code's `PermissionRequest` /
   `PreToolUse` matchers stabilize for `AskUserQuestion` and `ExitPlanMode`,
   add an optional hook config so the skill fires deterministically rather

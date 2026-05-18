@@ -35,10 +35,23 @@ fix, etc.) you can skip. Default to **invoking the skill**.
 
 ## How to use
 
-One step. Pipe the plan / question text into `run.sh` via stdin:
+One step. Pipe the plan / question text into `run.sh` via stdin. Pass
+`--trigger <type>` so the user can scope when the skill fires (optional but
+recommended):
 
 ```bash
-echo "<plan or question text>" | bash "${CLAUDE_PLUGIN_ROOT}/scripts/run.sh"
+# Before ExitPlanMode (presenting a multi-step plan)
+echo "<plan>"     | bash "${CLAUDE_PLUGIN_ROOT}/scripts/run.sh" --trigger plan
+
+# Before AskUserQuestion (clarifying / asking the user to choose)
+echo "<question>" | bash "${CLAUDE_PLUGIN_ROOT}/scripts/run.sh" --trigger clarify
+
+# Any other significant decision moment
+echo "<context>"  | bash "${CLAUDE_PLUGIN_ROOT}/scripts/run.sh" --trigger decision
+
+# If you are unsure which trigger applies, omit the flag — the skill will
+# still generate (fail-safe).
+echo "<text>"     | bash "${CLAUDE_PLUGIN_ROOT}/scripts/run.sh"
 ```
 
 `${CLAUDE_PLUGIN_ROOT}` is set by Claude Code to this skill's root directory.
@@ -73,10 +86,32 @@ missing image rather than a thrown error.
 ## Setup
 
 - Node.js 18+ (uses the built-in `fetch`). No `npm install` required.
-- Set `GEMINI_API_KEY` (or `GOOGLE_API_KEY`) in the environment.
+- Set the API key for whichever provider you use (see Configuration below).
 - Optional, picked up automatically if present:
   - `tmux` + `chafa` — enables the in-terminal split-pane preview
   - `code` CLI — enables the VS Code markdown preview path
+
+## Configuration
+
+All configuration is through environment variables. Set them in your shell or
+in `~/.claude/settings.json` under the `env` key.
+
+| Env var | Values | Default | Notes |
+|---|---|---|---|
+| `VITL_ENABLED` | `1` / `0` (also accepts `true`/`false`/`yes`/`no`/`on`/`off`, case-insensitive) | unset (= enabled) | Master switch. Only disables on `0`/`false`/`no`/`off`; any other value (including unset) is enabled. |
+| `VITL_PROVIDER` | `gemini` / `vertexai` / `openai` / `azure` | `gemini` | Which API to call. |
+| `VITL_MODEL` | provider-specific model id | provider default | E.g. `gemini-2.5-flash-image` for free-tier on Gemini. |
+| `VITL_DISPLAY` | `auto` / `tmux` / `vscode` / `open` / `none` | `auto` | Force a display path, or `none` to suppress display. Unavailable choices fall back to `auto`. |
+| `VITL_TRIGGER` | comma-separated list (e.g. `plan,clarify`) or `all` | `all` | Restricts which `--trigger <type>` values actually fire generation. |
+
+### Provider-specific env
+
+| `VITL_PROVIDER` | Required env | Default `VITL_MODEL` |
+|---|---|---|
+| `gemini` | `GEMINI_API_KEY` or `GOOGLE_API_KEY` | `gemini-3-pro-image-preview` |
+| `vertexai` | `GOOGLE_APPLICATION_CREDENTIALS` + `VITL_VERTEX_PROJECT` + `VITL_VERTEX_LOCATION` | `gemini-3-pro-image-preview` |
+| `openai` | `OPENAI_API_KEY` | `gpt-image-1` |
+| `azure` | `AZURE_OPENAI_API_KEY` + `AZURE_OPENAI_ENDPOINT` + `AZURE_OPENAI_DEPLOYMENT` | (deployment-specific) |
 
 ## Do NOT
 
