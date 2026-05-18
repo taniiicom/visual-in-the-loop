@@ -5,6 +5,10 @@
 - claude code や codex などのコーディングエージェントにおける plan agent/plan mode や、spec-kit で、plan を作ってもらうのは良いんですが、そのplanを人がレビューするのが大変
 - なので、plan の是非をユーザに尋ねたり、clarifyや質問エージェントなど、ユーザに決定を求めるタイミングで、別途 "nano banana 2"などを呼び出して1枚図を作成する agent skills を作りたい
 
+- smoke test
+- スモークテストで使う plan の原文を file:///Users/taniiicom/projects/\_libraries/skills-visual-in-the-loop/docs/plan/visual-in-the-loop.md に
+- どういうskills かが，画像で表示されて，チュートリアル代わりにもなるのでちょうど良いと思います ^^
+
 ## clarify
 
 ```md
