@@ -100,18 +100,20 @@ and picks the first one that's available in your environment.
 
 ## Try it
 
-After installing, smoke-test it directly:
+After installing, smoke-test it with the bundled sample plan — the image you
+get back is a visual explanation of what the skill does, so it doubles as a
+tutorial:
 
 ```bash
-echo "Plan: split auth module into oauth/, session/, and mfa/ subpackages \
-and unify the entry point." \
+cat ~/.claude/skills/visual-in-the-loop/references/sample-plan.md \
   | bash ~/.claude/skills/visual-in-the-loop/scripts/run.sh
 ```
 
 You should see:
 
 - `[visual-in-the-loop] rendered: /var/folders/.../<timestamp>.png` on stdout
-- An image popping up in your image viewer / tmux pane / VS Code
+- An image popping up in your image viewer / tmux pane / VS Code, depicting
+  the agent → skill → image → user flow
 
 Then start a Claude Code session and ask for a non-trivial plan (e.g.
 "Refactor the auth module — make a plan first"). When the agent gets to
