@@ -109,9 +109,9 @@ in `~/.claude/settings.json` under the `env` key.
 | `VITL_PROVIDER` | Required env | Default `VITL_MODEL` |
 |---|---|---|
 | `gemini` | `GEMINI_API_KEY` or `GOOGLE_API_KEY` | `gemini-3-pro-image-preview` |
-| `vertexai` | `GOOGLE_APPLICATION_CREDENTIALS` + `VITL_VERTEX_PROJECT` + `VITL_VERTEX_LOCATION` | `gemini-3-pro-image-preview` |
+| `vertexai` | `VITL_VERTEX_PROJECT` + `VITL_VERTEX_LOCATION` (auth via `gcloud auth application-default login`) | `gemini-3-pro-image-preview` |
 | `openai` | `OPENAI_API_KEY` | `gpt-image-1` |
-| `azure` | `AZURE_OPENAI_API_KEY` + `AZURE_OPENAI_ENDPOINT` + `AZURE_OPENAI_DEPLOYMENT` | (deployment-specific) |
+| `azure` | `AZURE_OPENAI_API_KEY` + `AZURE_OPENAI_ENDPOINT` + `AZURE_OPENAI_DEPLOYMENT` (optional `AZURE_OPENAI_API_VERSION`) | deployment-specific (`VITL_MODEL` ignored) |
 
 ## Do NOT
 

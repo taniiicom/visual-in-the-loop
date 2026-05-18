@@ -135,12 +135,17 @@ For project-only overrides, use the same `env` block in
 | `VITL_PROVIDER` | Required env vars | Default `VITL_MODEL` |
 |---|---|---|
 | `gemini` | `GEMINI_API_KEY` *or* `GOOGLE_API_KEY` | `gemini-3-pro-image-preview` |
-| `vertexai` | `GOOGLE_APPLICATION_CREDENTIALS` + `VITL_VERTEX_PROJECT` + `VITL_VERTEX_LOCATION` | `gemini-3-pro-image-preview` |
+| `vertexai` | `VITL_VERTEX_PROJECT` + `VITL_VERTEX_LOCATION` (auth via `gcloud auth application-default login`, see below) | `gemini-3-pro-image-preview` |
 | `openai` | `OPENAI_API_KEY` | `gpt-image-1` |
-| `azure` | `AZURE_OPENAI_API_KEY` + `AZURE_OPENAI_ENDPOINT` + `AZURE_OPENAI_DEPLOYMENT` | deployment-specific |
+| `azure` | `AZURE_OPENAI_API_KEY` + `AZURE_OPENAI_ENDPOINT` + `AZURE_OPENAI_DEPLOYMENT` (optional `AZURE_OPENAI_API_VERSION`, default `2024-10-21`) | deployment-specific (`VITL_MODEL` is ignored — model is set by the deployment) |
 
-> Only the Gemini provider is fully implemented today. Vertex AI / OpenAI /
-> Azure are on the roadmap — see [Roadmap](#roadmap).
+**Vertex AI auth note**: the skill calls
+`gcloud auth application-default print-access-token` at runtime to keep itself
+zero-dependency. Install the [gcloud CLI][gcloud] and run
+`gcloud auth application-default login` once. If gcloud isn't available the
+provider returns a clear error and the agent proceeds without a visual.
+
+[gcloud]: https://cloud.google.com/sdk/docs/install
 
 ### Fail-safes
 
@@ -233,10 +238,6 @@ skill falls through to `open` / `xdg-open`.
 
 ## Roadmap
 
-- **Additional providers** — `providers/openai.mjs`, `providers/vertexai.mjs`,
-  `providers/azure.mjs`. The Gemini provider works today; the others are
-  scaffolded for and the `VITL_PROVIDER` env var is wired up, but the modules
-  are not yet implemented.
 - `references/hook-example.md` — once Claude Code's `PermissionRequest` /
   `PreToolUse` matchers stabilize for `AskUserQuestion` and `ExitPlanMode`,
   add an optional hook config so the skill fires deterministically rather
