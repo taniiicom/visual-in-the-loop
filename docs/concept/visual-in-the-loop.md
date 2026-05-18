@@ -9,6 +9,17 @@
 - スモークテストで使う plan の原文を file:///Users/taniiicom/projects/\_libraries/skills-visual-in-the-loop/docs/plan/visual-in-the-loop.md に
 - どういうskills かが，画像で表示されて，チュートリアル代わりにもなるのでちょうど良いと思います ^^
 
+- 環境変数
+- API key
+- AI プロバイダ
+  e.g. Gemini, VertexAI, OpenAI, Azure など
+- 画像生成モデル
+  gemini-3.1-flash-image-preview, gemini-3-pro-image-preview, gpt-image-2 など
+- ビジュアル表示方法
+  e.g. auto, など
+- トリガー (複数選択可)
+  e.g. すべて, plan ...
+
 ## clarify
 
 ```md
