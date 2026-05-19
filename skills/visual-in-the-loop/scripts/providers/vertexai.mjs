@@ -59,6 +59,9 @@ export async function generate({ prompt, model, env }) {
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
+        systemInstruction: {
+          parts: [{ text: "Respond with a generated image, not with text." }],
+        },
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: { responseModalities: ["TEXT", "IMAGE"] },
       }),
@@ -73,10 +76,19 @@ export async function generate({ prompt, model, env }) {
   }
 
   const json = await resp.json();
-  const part = json.candidates?.[0]?.content?.parts?.find((p) => p.inlineData);
-  if (!part) {
-    return { ok: false, error: "no image part in response" };
+  const parts = json.candidates?.[0]?.content?.parts ?? [];
+  const imagePart = parts.find((p) => p.inlineData);
+  if (!imagePart) {
+    const textPreview = parts
+      .map((p) => p.text)
+      .filter(Boolean)
+      .join(" ")
+      .slice(0, 200);
+    return {
+      ok: false,
+      error: `no image part in response${textPreview ? `; text returned: "${textPreview}"` : ""}`,
+    };
   }
 
-  return { ok: true, png: Buffer.from(part.inlineData.data, "base64") };
+  return { ok: true, png: Buffer.from(imagePart.inlineData.data, "base64") };
 }
