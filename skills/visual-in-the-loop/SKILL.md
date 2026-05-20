@@ -97,8 +97,9 @@ rendered to the user's environment. Only then should you call
    single image), then calls the configured provider once per slide. Each
    PNG is saved to `$TMPDIR/visual-in-the-loop/<timestamp>-<n>.png`.
 2. `show.sh` detects the environment and uses ONE of:
-   - **tmux + chafa**: a single side pane that shows all images; ← / →
-     cycles, Enter closes. Re-renders on pane / window resize.
+   - **tmux + chafa**: a single side pane that shows all images stacked
+     vertically (pane height split evenly). Enter closes. Re-renders on
+     pane / window resize.
    - **VS Code / Cursor / Windsurf**: a temp markdown with each title and
      image embedded sequentially.
    - **macOS**: `open` with all paths (Preview opens them with a sidebar).

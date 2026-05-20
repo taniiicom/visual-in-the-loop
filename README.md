@@ -36,8 +36,9 @@ skills/
 2. The skill calls Gemini 3 Pro Image once per slide and writes each PNG to
    a temp file.
 3. The skill detects your environment and **renders all images into your view**:
-   - In a **tmux** session with `chafa` installed → single side pane, ← / →
-     to cycle between slides, Enter to close. Re-renders on resize.
+   - In a **tmux** session with `chafa` installed → single side pane with all
+     slides stacked vertically (height split evenly), Enter to close.
+     Re-renders on resize.
    - In **VS Code / Cursor / Windsurf** → a markdown tab with every title
      and image embedded.
    - On **macOS** → `open` with all paths (Preview opens them with a sidebar).

@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
-# Render one or more images with chafa in the current pane.
-# - Re-renders on SIGWINCH so it stays correct across tmux pane / window resizes.
-# - With multiple images: ← / → cycles, Enter closes.
-# - With a single image: Enter closes.
+# Render one or more images stacked vertically with chafa, dividing the pane
+# height evenly among them. Re-renders on SIGWINCH so it stays correct across
+# tmux pane / window resizes. Press Enter (in the pane) to close.
 
 set -u
 
@@ -19,40 +18,34 @@ if [ "${#PATHS[@]}" -eq 0 ]; then
 fi
 
 TOTAL=${#PATHS[@]}
-CURRENT=0
 
 render() {
     clear
-    chafa "${PATHS[$CURRENT]}"
+    local cols rows per_rows i
+    cols=$(tput cols)
+    rows=$(tput lines)
     if [ "$TOTAL" -gt 1 ]; then
-        printf '\n[%d/%d]  ← / →  navigate · Enter  close' \
-            "$((CURRENT + 1))" "$TOTAL"
+        # Reserve one gap row between images
+        per_rows=$(( (rows - (TOTAL - 1)) / TOTAL ))
+        [ "$per_rows" -lt 5 ] && per_rows=5
+    else
+        per_rows=$rows
     fi
+    for i in "${!PATHS[@]}"; do
+        chafa --size=${cols}x${per_rows} "${PATHS[$i]}"
+        if [ "$i" -lt "$((TOTAL - 1))" ]; then
+            echo
+        fi
+    done
 }
 
 trap render WINCH
 render
 
+# Block until the user presses Enter. WINCH may interrupt `read`; if so the
+# read returns non-zero and we loop to wait again.
 while true; do
-    IFS= read -rsn1 key || continue
-    case "$key" in
-        "")
-            # Enter — exit
-            break
-            ;;
-        $'\033')
-            # ESC sequence — likely an arrow key
-            IFS= read -rsn2 -t 0.1 rest || rest=""
-            case "$rest" in
-                "[C")  # right
-                    CURRENT=$(( (CURRENT + 1) % TOTAL ))
-                    render
-                    ;;
-                "[D")  # left
-                    CURRENT=$(( (CURRENT - 1 + TOTAL) % TOTAL ))
-                    render
-                    ;;
-            esac
-            ;;
-    esac
+    if read -r _; then
+        break
+    fi
 done
