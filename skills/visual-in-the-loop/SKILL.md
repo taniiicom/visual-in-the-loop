@@ -1,15 +1,18 @@
 ---
 name: visual-in-the-loop
 description: >-
-  Generate a single visual (Nano Banana Pro / Gemini 3 Pro Image) of any plan,
-  spec, or design BEFORE asking the user to review or decide. USE PROACTIVELY
-  whenever you are about to call AskUserQuestion, ExitPlanMode, or otherwise
-  request human review of a multi-step plan, an ambiguous spec, an architecture
-  choice, a UI mockup, or any conceptual design. This skill blocks until the
-  image is rendered to the user's environment (open / tmux+chafa / VS Code
-  markdown). Call this FIRST, then present the question. Humans review plans
-  much faster with a visual — do not just describe the diagram in text and skip
-  this skill.
+  Generate one or more visuals (Nano Banana Pro / Gemini 3 Pro Image) of
+  whatever you are about to ask the user to decide or approve, and show them
+  BEFORE you ask. USE PROACTIVELY whenever you are about to call
+  AskUserQuestion, ExitPlanMode, or otherwise request a human decision on a
+  multi-step plan, an ambiguous spec, an architecture choice, a UI mockup, or a
+  set of options to choose between. The image must picture the decision itself
+  — for a question, a side-by-side comparison of the exact options being
+  offered; for a plan, the plan's shape. The skill produces one image per
+  slide and blocks until all are rendered to the user's environment (open /
+  tmux+chafa / VS Code markdown). Call this FIRST, then present the question.
+  Humans review decisions far faster with a picture — do not just describe a
+  diagram in text and skip this skill.
 allowed-tools: Bash
 license: MIT
 ---
