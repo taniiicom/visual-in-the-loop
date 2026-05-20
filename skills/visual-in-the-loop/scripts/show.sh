@@ -11,6 +11,7 @@
 # Anything other than the values above is treated as "auto".
 
 set -u
+SHOW_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 IMG="${1:-}"
 if [ -z "$IMG" ] || [ ! -f "$IMG" ]; then
     echo "[visual-in-the-loop] show.sh: image not found: $IMG" >&2
@@ -21,7 +22,7 @@ DISPLAY_PREF="$(echo "${VITL_DISPLAY:-auto}" | tr '[:upper:]' '[:lower:]')"
 
 try_tmux() {
     if [ -n "${TMUX:-}" ] && command -v tmux >/dev/null 2>&1 && command -v chafa >/dev/null 2>&1; then
-        tmux split-window -h -d "chafa --size=80x40 '$IMG'; read -r _"
+        tmux split-window -h -d "bash '$SHOW_DIR/render-tmux-pane.sh' '$IMG'"
         return 0
     fi
     return 1
