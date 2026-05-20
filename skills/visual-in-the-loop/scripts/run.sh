@@ -9,8 +9,11 @@
 #
 # Argv (optional):
 #   --trigger <type>   one of plan / clarify / decision, passed by the agent.
-#                      If omitted, the skill still fires (fail-safe — never miss a
-#                      visualization just because the agent forgot the flag).
+#                      If omitted, the skill still fires (fail-safe).
+#
+# Stdin:
+#   Either a JSON array of {title, content} objects (or plain strings) for
+#   multi-slide mode, or plain text for single-image mode. See generate.mjs.
 
 set -u
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -38,14 +41,17 @@ if [ -n "$TRIGGER" ] && [ "$ALLOWED" != "all" ]; then
     fi
 fi
 
-# 4. Generate
-IMG=$(node "$SCRIPT_DIR/generate.mjs")
+# 4. Generate (produces 1..N TSV lines: path<TAB>title)
+OUTPUT=$(node "$SCRIPT_DIR/generate.mjs")
 GEN_STATUS=$?
-if [ $GEN_STATUS -ne 0 ] || [ -z "$IMG" ] || [ ! -f "$IMG" ]; then
+if [ $GEN_STATUS -ne 0 ] || [ -z "$OUTPUT" ]; then
     echo "[visual-in-the-loop] generation failed, continuing without visual" >&2
     exit 0
 fi
 
-# 5. Show
-bash "$SCRIPT_DIR/show.sh" "$IMG" || true
-echo "[visual-in-the-loop] rendered: $IMG"
+# 5. Show (TSV via stdin)
+echo "$OUTPUT" | bash "$SCRIPT_DIR/show.sh" || true
+
+# 6. Summary line for the agent
+COUNT=$(echo "$OUTPUT" | grep -c .)
+echo "[visual-in-the-loop] rendered $COUNT image(s)"

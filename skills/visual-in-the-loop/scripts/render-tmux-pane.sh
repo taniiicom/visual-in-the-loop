@@ -1,29 +1,58 @@
 #!/usr/bin/env bash
-# Render an image with chafa in the current terminal, filling the pane.
-# Re-render on SIGWINCH so it stays correct across tmux pane resizes.
-# Press Enter (in the pane) to close.
+# Render one or more images with chafa in the current pane.
+# - Re-renders on SIGWINCH so it stays correct across tmux pane / window resizes.
+# - With multiple images: ← / → cycles, Enter closes.
+# - With a single image: Enter closes.
 
 set -u
-IMG="${1:-}"
-if [ -z "$IMG" ] || [ ! -f "$IMG" ]; then
-    echo "render-tmux-pane.sh: missing or invalid image path: $IMG" >&2
+
+PATHS=()
+for arg in "$@"; do
+    if [ -f "$arg" ]; then
+        PATHS+=("$arg")
+    fi
+done
+
+if [ "${#PATHS[@]}" -eq 0 ]; then
+    echo "render-tmux-pane.sh: no valid image paths" >&2
     exit 1
 fi
 
+TOTAL=${#PATHS[@]}
+CURRENT=0
+
 render() {
     clear
-    # No --size: chafa auto-detects terminal/pane size and fills it,
-    # preserving aspect ratio.
-    chafa "$IMG"
+    chafa "${PATHS[$CURRENT]}"
+    if [ "$TOTAL" -gt 1 ]; then
+        printf '\n[%d/%d]  ← / →  navigate · Enter  close' \
+            "$((CURRENT + 1))" "$TOTAL"
+    fi
 }
 
 trap render WINCH
 render
 
-# Block until the user presses Enter. WINCH may interrupt `read`; if so the
-# read returns non-zero and we loop to wait again.
 while true; do
-    if read -r _; then
-        break
-    fi
+    IFS= read -rsn1 key || continue
+    case "$key" in
+        "")
+            # Enter — exit
+            break
+            ;;
+        $'\033')
+            # ESC sequence — likely an arrow key
+            IFS= read -rsn2 -t 0.1 rest || rest=""
+            case "$rest" in
+                "[C")  # right
+                    CURRENT=$(( (CURRENT + 1) % TOTAL ))
+                    render
+                    ;;
+                "[D")  # left
+                    CURRENT=$(( (CURRENT - 1 + TOTAL) % TOTAL ))
+                    render
+                    ;;
+            esac
+            ;;
+    esac
 done

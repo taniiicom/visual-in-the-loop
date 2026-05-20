@@ -30,16 +30,23 @@ skills/
 
 ## How it behaves
 
-1. Just before the agent asks you to review a plan, it pipes the plan text into
-   the skill via stdin.
-2. The skill calls Gemini 3 Pro Image and writes a PNG to a temp file.
-3. The skill detects your environment and **renders the image into your view**:
-   - In a **tmux** session with `chafa` installed → split-pane preview
-   - In **VS Code / Cursor / Windsurf** → opens a markdown tab with the image
-   - On **macOS** → `open` (Preview.app)
-   - On **Linux** desktop → `xdg-open`
-4. Only **after** the image is on screen does the agent show the actual
-   question. You decide while looking at the picture.
+1. Just before the agent asks you to review a plan, it **picks 1–4 things in
+   the plan worth visualizing** (architecture, data flow, UI mockup, phase
+   timeline, etc.) and pipes them as a JSON array into the skill.
+2. The skill calls Gemini 3 Pro Image once per slide and writes each PNG to
+   a temp file.
+3. The skill detects your environment and **renders all images into your view**:
+   - In a **tmux** session with `chafa` installed → single side pane, ← / →
+     to cycle between slides, Enter to close. Re-renders on resize.
+   - In **VS Code / Cursor / Windsurf** → a markdown tab with every title
+     and image embedded.
+   - On **macOS** → `open` with all paths (Preview opens them with a sidebar).
+   - On **Linux** desktop → `xdg-open` per image.
+4. Only **after** the slides are on screen does the agent show the actual
+   question. You decide while looking at the pictures.
+
+Trivial plans get a single image (the agent can also pipe plain text and
+the skill treats it as one slide).
 
 If anything goes wrong (no API key, network down, no display path), the skill
 returns silently and the agent asks the question as usual. It never blocks the

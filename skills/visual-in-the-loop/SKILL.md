@@ -35,42 +35,75 @@ fix, etc.) you can skip. Default to **invoking the skill**.
 
 ## How to use
 
-One step. Pipe the plan / question text into `run.sh` via stdin. Pass
-`--trigger <type>` so the user can scope when the skill fires (optional but
-recommended):
+**Step 1 — decide what to visualize.** Before running the skill, *pause and
+think*: "What 1–4 separate visuals would let the user grasp this plan at a
+glance?" A typical plan deserves a small set of slides, e.g.:
+
+- the overall architecture / components
+- the data or control flow
+- a UI mockup or screen layout
+- a phase / step timeline
+
+Pick the ones that actually help. Trivial plans need just one slide. Don't
+manufacture slides for the sake of count.
+
+**Step 2 — pass them as a JSON array on stdin.** Each item is
+`{title, content}`; `content` is what Gemini will visualize, `title` is
+shown to the user above the image (in the markdown / cycle UI).
 
 ```bash
-# Before ExitPlanMode (presenting a multi-step plan)
-echo "<plan>"     | bash "${CLAUDE_PLUGIN_ROOT}/scripts/run.sh" --trigger plan
-
-# Before AskUserQuestion (clarifying / asking the user to choose)
-echo "<question>" | bash "${CLAUDE_PLUGIN_ROOT}/scripts/run.sh" --trigger clarify
-
-# Any other significant decision moment
-echo "<context>"  | bash "${CLAUDE_PLUGIN_ROOT}/scripts/run.sh" --trigger decision
-
-# If you are unsure which trigger applies, omit the flag — the skill will
-# still generate (fail-safe).
-echo "<text>"     | bash "${CLAUDE_PLUGIN_ROOT}/scripts/run.sh"
+cat <<'EOF' | bash "${CLAUDE_PLUGIN_ROOT}/scripts/run.sh" --trigger plan
+[
+  {
+    "title": "Architecture",
+    "content": "describe the architecture you want pictured..."
+  },
+  {
+    "title": "Data flow",
+    "content": "describe the data flow..."
+  }
+]
+EOF
 ```
+
+`title` is optional. You can also pass an array of plain strings:
+`["content 1", "content 2"]`.
+
+**Single-slide / legacy mode.** If you pipe anything that doesn't start with
+`[`, the skill treats the whole stdin as one visualization request — useful
+for quick or trivial plans.
+
+```bash
+echo "<plan or question>" | bash "${CLAUDE_PLUGIN_ROOT}/scripts/run.sh" --trigger plan
+```
+
+**Trigger flag.** Use `--trigger <type>` so the user can scope when the skill
+fires (optional, fail-safe if omitted):
+
+- `--trigger plan` — before `ExitPlanMode`
+- `--trigger clarify` — before `AskUserQuestion`
+- `--trigger decision` — any other significant decision moment
 
 `${CLAUDE_PLUGIN_ROOT}` is set by Claude Code to this skill's root directory.
 For a directly-installed skill, substitute the absolute path to this skill dir.
 
-The script is **synchronous**. It returns only after the image has been
+The script is **synchronous**. It returns only after every image has been
 rendered to the user's environment. Only then should you call
 `AskUserQuestion` / `ExitPlanMode` and pull the user's attention.
 
 ## What happens
 
-1. `generate.mjs` reads the plan text from stdin, sends it to Gemini 3 Pro
-   Image, and writes a PNG to `$TMPDIR/visual-in-the-loop/<timestamp>.png`.
+1. `generate.mjs` parses stdin (JSON array → multi-slide, anything else →
+   single image), then calls the configured provider once per slide. Each
+   PNG is saved to `$TMPDIR/visual-in-the-loop/<timestamp>-<n>.png`.
 2. `show.sh` detects the environment and uses ONE of:
-   - **tmux + chafa**: split-pane preview (most embedded feel)
-   - **VS Code / Cursor / Windsurf**: open a temp markdown with the image
-   - **macOS**: `open` (default image viewer)
-   - **Linux desktop**: `xdg-open`
-3. `run.sh` prints `[visual-in-the-loop] rendered: <path>` to stdout.
+   - **tmux + chafa**: a single side pane that shows all images; ← / →
+     cycles, Enter closes. Re-renders on pane / window resize.
+   - **VS Code / Cursor / Windsurf**: a temp markdown with each title and
+     image embedded sequentially.
+   - **macOS**: `open` with all paths (Preview opens them with a sidebar).
+   - **Linux desktop**: `xdg-open` per image.
+3. `run.sh` prints `[visual-in-the-loop] rendered N image(s)` to stdout.
 
 ## Failure mode
 
