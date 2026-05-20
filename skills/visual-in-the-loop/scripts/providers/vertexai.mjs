@@ -59,11 +59,8 @@ export async function generate({ prompt, model, env }) {
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
-        systemInstruction: {
-          parts: [{ text: "Respond with a generated image, not with text." }],
-        },
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { responseModalities: ["TEXT", "IMAGE"] },
+        generationConfig: { responseModalities: ["IMAGE"] },
       }),
     });
   } catch (err) {

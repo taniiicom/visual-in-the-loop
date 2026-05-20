@@ -18,11 +18,8 @@ export async function generate({ prompt, model, env }) {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
       body: JSON.stringify({
-        systemInstruction: {
-          parts: [{ text: "Respond with a generated image, not with text." }],
-        },
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { responseModalities: ["TEXT", "IMAGE"] },
+        generationConfig: { responseModalities: ["IMAGE"] },
       }),
     });
   } catch (err) {
