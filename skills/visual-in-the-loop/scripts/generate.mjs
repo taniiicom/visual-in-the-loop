@@ -26,7 +26,16 @@ const template = readFileSync(
   join(here, "..", "references", "prompt-template.md"),
   "utf-8",
 );
-const prompt = template.replace("{plan}", planText);
+
+// {language}: an optional " in <language>" clause. VITL_LANG is set by run.sh
+// from the agent's `--lang` argument (the language the conversation is being
+// held in). Function replacers avoid `$` patterns in the substituted text
+// being interpreted.
+const lang = (process.env.VITL_LANG || "").trim();
+const languageClause = lang ? ` in ${lang}` : "";
+const prompt = template
+  .replace("{language}", () => languageClause)
+  .replace("{plan}", () => planText);
 
 const provider = (process.env.VITL_PROVIDER ?? "gemini").toLowerCase();
 const model = process.env.VITL_MODEL || "";

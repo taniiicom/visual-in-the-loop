@@ -7,9 +7,13 @@
 #   VITL_TRIGGER   comma-separated allowed triggers (e.g. "plan,clarify") or
 #                  "all". Default: all.
 #
-# Argv (optional):
+# Argv (optional, any order):
 #   --trigger <type>   one of plan / clarify / decision, passed by the agent.
 #                      If omitted, the skill still fires (fail-safe).
+#   --lang <language>  the language the conversation is being held in (e.g.
+#                      "Japanese"). The diagram's text is rendered in it.
+#                      Overrides the VITL_LANG env var. If neither is given,
+#                      the model uses the plan text's own language.
 #
 # Stdin: the plain text to visualize (a plan, a question with its options,
 # etc.). It is passed to the model verbatim — pipe the real text, not a
@@ -25,12 +29,24 @@ case "$(echo "${VITL_ENABLED:-}" | tr '[:upper:]' '[:lower:]')" in
         ;;
 esac
 
-# 2. Parse --trigger arg (optional)
+# 2. Parse optional args: --trigger <type>, --lang <language> (any order)
 TRIGGER=""
-if [ "${1:-}" = "--trigger" ]; then
-    TRIGGER="${2:-}"
-    shift 2 || shift
-fi
+LANG_VALUE="${VITL_LANG:-}"
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --trigger)
+            TRIGGER="${2:-}"
+            shift; [ $# -gt 0 ] && shift
+            ;;
+        --lang)
+            LANG_VALUE="${2:-}"
+            shift; [ $# -gt 0 ] && shift
+            ;;
+        *)
+            shift
+            ;;
+    esac
+done
 
 # 3. Trigger filter (only applies when VITL_TRIGGER is restrictive AND
 #    a --trigger value was passed)
@@ -42,8 +58,8 @@ if [ -n "$TRIGGER" ] && [ "$ALLOWED" != "all" ]; then
     fi
 fi
 
-# 4. Generate one image
-IMG=$(node "$SCRIPT_DIR/generate.mjs")
+# 4. Generate one image (VITL_LANG carries the resolved diagram language)
+IMG=$(VITL_LANG="$LANG_VALUE" node "$SCRIPT_DIR/generate.mjs")
 GEN_STATUS=$?
 if [ $GEN_STATUS -ne 0 ] || [ -z "$IMG" ] || [ ! -f "$IMG" ]; then
     echo "[visual-in-the-loop] generation failed, continuing without visual" >&2

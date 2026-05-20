@@ -135,6 +135,7 @@ For project-only overrides, use the same `env` block in
 | `VITL_PROVIDER` | `gemini` / `vertexai` / `openai` / `azure` | `gemini` | Which API to call. |
 | `VITL_MODEL` | provider-specific id | provider default | E.g. `gemini-2.5-flash-image` for free-tier Gemini. |
 | `VITL_ASPECT_RATIO` | `W:H` ratio — `2:3`, `3:4`, `4:5`, `9:16`, `1:1`, `4:3`, `3:2`, `16:9` | `2:3` (portrait) | Shape of the generated image. Gemini / Vertex use it directly; OpenAI / Azure map it to the nearest portrait / landscape / square size. |
+| `VITL_LANG` | a language name (e.g. `Japanese`, `English`) | unset | Default language for the diagram's text. The agent normally sets this per call via `--lang` (the current conversation language); the env var is just a static fallback. |
 | `VITL_DISPLAY` | `auto` / `tmux` / `vscode` / `open` / `none` | `auto` | Force a display path, or `none` to suppress. Unusable choices fall back to `auto`. |
 | `VITL_TRIGGER` | comma-separated (`plan,clarify,decision`) or `all` | `all` | Which `--trigger <type>` invocations actually fire generation. |
 

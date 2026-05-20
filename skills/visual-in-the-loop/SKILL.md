@@ -41,7 +41,7 @@ review or decide into `run.sh` via stdin. For a multi-line plan, use a
 heredoc:
 
 ```bash
-cat <<'EOF' | bash "${CLAUDE_PLUGIN_ROOT}/scripts/run.sh" --trigger plan
+cat <<'EOF' | bash "${CLAUDE_PLUGIN_ROOT}/scripts/run.sh" --trigger plan --lang Japanese
 <the full plan text, exactly as you would present it to the user>
 EOF
 ```
@@ -50,7 +50,7 @@ For a short question:
 
 ```bash
 echo "<the question and all of its options>" \
-  | bash "${CLAUDE_PLUGIN_ROOT}/scripts/run.sh" --trigger clarify
+  | bash "${CLAUDE_PLUGIN_ROOT}/scripts/run.sh" --trigger clarify --lang English
 ```
 
 **Pipe the real text, verbatim — this is the one thing that matters.** For
@@ -70,6 +70,12 @@ The skill produces exactly **one image**.
 - `--trigger plan` — before `ExitPlanMode`
 - `--trigger clarify` — before `AskUserQuestion`
 - `--trigger decision` — any other significant decision moment
+
+**Language flag.** Pass `--lang <language>` set to the language **this
+conversation is being held in** (e.g. `--lang Japanese`, `--lang English`) so
+the diagram's labels and text are written in the user's language. Determine it
+from the conversation and pass it every time. If omitted, the model uses
+whatever language the plan text happens to be in.
 
 `${CLAUDE_PLUGIN_ROOT}` is set by Claude Code to this skill's root directory.
 For a directly-installed skill, substitute the absolute path to this skill dir.
@@ -122,6 +128,7 @@ in `~/.claude/settings.json` under the `env` key.
 | `VITL_PROVIDER` | `gemini` / `vertexai` / `openai` / `azure` | `gemini` | Which API to call. |
 | `VITL_MODEL` | provider-specific model id | provider default | E.g. `gemini-2.5-flash-image` for free-tier on Gemini. |
 | `VITL_ASPECT_RATIO` | a `W:H` ratio — `2:3`, `3:4`, `4:5`, `9:16`, `1:1`, `4:3`, `3:2`, `16:9` | `2:3` (portrait) | Shape of the generated image. Gemini / Vertex AI use it directly; OpenAI / Azure map it to the nearest portrait / landscape / square size. |
+| `VITL_LANG` | a language name (e.g. `Japanese`, `English`) | unset | Default language for the diagram's text. The agent's `--lang` argument overrides it per call. If neither is set, the model uses the plan text's own language. |
 | `VITL_DISPLAY` | `auto` / `tmux` / `vscode` / `open` / `none` | `auto` | Force a display path, or `none` to suppress display. Unavailable choices fall back to `auto`. |
 | `VITL_TRIGGER` | comma-separated list (e.g. `plan,clarify`) or `all` | `all` | Restricts which `--trigger <type>` values actually fire generation. |
 
@@ -152,5 +159,8 @@ in `~/.claude/settings.json` under the `env` key.
 ## Tuning
 
 If diagrams come out off-target, edit `references/prompt-template.md` — that
-one-line instruction is the only knob. Do not pile on heuristics in
-`generate.mjs`, and do not pre-process the plan text upstream.
+one-line instruction is the only knob. It has two placeholders: `{plan}`
+(required — the piped text) and `{language}` (optional — replaced with a
+language clause when `--lang` / `VITL_LANG` is set, or with nothing). Do not
+pile on heuristics in `generate.mjs`, and do not pre-process the plan text
+upstream.
