@@ -24,13 +24,12 @@ render() {
     local cols rows per_rows i
     cols=$(tput cols)
     rows=$(tput lines)
-    if [ "$TOTAL" -gt 1 ]; then
-        # Reserve one gap row between images
-        per_rows=$(( (rows - (TOTAL - 1)) / TOTAL ))
-        [ "$per_rows" -lt 5 ] && per_rows=5
-    else
-        per_rows=$rows
-    fi
+    # chafa ends every render with a trailing newline. If the output reaches
+    # the last pane row, that newline scrolls the pane and clips the top of
+    # the image. Reserve one row per image so the stacked output always fits
+    # within the pane height.
+    per_rows=$(( (rows - TOTAL) / TOTAL ))
+    [ "$per_rows" -lt 5 ] && per_rows=5
     for i in "${!PATHS[@]}"; do
         chafa --size=${cols}x${per_rows} "${PATHS[$i]}"
         if [ "$i" -lt "$((TOTAL - 1))" ]; then
