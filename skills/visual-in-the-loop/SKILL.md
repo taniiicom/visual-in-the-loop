@@ -35,18 +35,26 @@ fix, etc.) you can skip. Default to **invoking the skill**.
 
 ## How to use
 
-**Step 1 — decide what to visualize.** What belongs in the visuals depends on
-what you are about to do. **This is the most important step — get it right.**
+**Step 1 — decide what to visualize.** This is the most important step.
 
-**Before `ExitPlanMode` (presenting a plan):** visualize the plan itself.
-Pick the 1–4 views that make it graspable at a glance, e.g. the architecture /
-components, the data or control flow, a UI mockup, a phase timeline.
+**The rule:** visualize *what you are asking the user to decide or approve* —
+the decision point itself, not the surrounding background or context they
+are not being asked about. Every time this skill fires you are about to
+request a human decision or approval; the image must be a picture *of that
+decision*.
 
-**Before `AskUserQuestion` (asking the user to choose):** visualize the
-**decision**, NOT the surrounding plan. The image must be a **side-by-side
-comparison of the exact options you are about to offer the user**. In the
-slide `content`, name each option, describe what it is and its tradeoffs, and
-explicitly ask for a comparison graphic. This is usually a single slide.
+Applying the rule:
+
+**Before `ExitPlanMode` — the user is approving a plan.** Visualize what they
+are approving: the plan's key shape — architecture / components, data or
+control flow, a UI mockup, a phase timeline. Pick the 1–4 views that make the
+plan graspable at a glance.
+
+**Before `AskUserQuestion` — the user is choosing between options.** Visualize
+the choice itself: a **side-by-side comparison of the exact options you are
+about to offer the user**. In the slide `content`, name each option, describe
+what it is and its tradeoffs, and explicitly ask for a comparison graphic.
+This is usually a single slide.
 
 > Example — you are about to call `AskUserQuestion` asking "Which LLM
 > backend?" with options Server-LLM / On-device / Hybrid. Do **NOT** visualize
