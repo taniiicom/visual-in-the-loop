@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
-# Render one or more images stacked vertically with chafa, dividing the pane
-# height evenly among them. Re-renders on SIGWINCH so it stays correct across
-# tmux pane / window resizes. Press Enter (in the pane) to close.
+# Render one or more images with chafa in the current pane.
+# - Single image: fit entirely within the pane (no scrolling needed).
+# - Multiple images: each at full pane width with natural height, stacked
+#   vertically. The total can exceed the pane height — scroll with tmux
+#   copy-mode (Ctrl-b [ then arrows / PageUp) to see them all.
+# - Re-renders on SIGWINCH so it stays correct across tmux pane / window
+#   resizes.
+# - Press Enter (in the pane) to close.
 
 set -u
 
@@ -21,21 +26,25 @@ TOTAL=${#PATHS[@]}
 
 render() {
     clear
-    local cols rows per_rows i
+    # Drop stale scrollback from earlier renders (e.g. before a resize) so
+    # scrolling only ever shows the current set of images.
+    [ -n "${TMUX_PANE:-}" ] && tmux clear-history -t "$TMUX_PANE" 2>/dev/null
+    local cols rows i
     cols=$(tput cols)
     rows=$(tput lines)
-    # chafa ends every render with a trailing newline. If the output reaches
-    # the last pane row, that newline scrolls the pane and clips the top of
-    # the image. Reserve one row per image so the stacked output always fits
-    # within the pane height.
-    per_rows=$(( (rows - TOTAL) / TOTAL ))
-    [ "$per_rows" -lt 5 ] && per_rows=5
-    for i in "${!PATHS[@]}"; do
-        chafa --size=${cols}x${per_rows} "${PATHS[$i]}"
-        if [ "$i" -lt "$((TOTAL - 1))" ]; then
+    if [ "$TOTAL" -eq 1 ]; then
+        # Fit the whole image within the pane. Reserve 1 row for chafa's
+        # trailing newline so the top is not scrolled off.
+        chafa --size="${cols}x$((rows - 1))" "${PATHS[0]}"
+    else
+        # Full pane width, natural height, stacked vertically. Total height
+        # may exceed the pane; the user scrolls to see everything.
+        for i in "${!PATHS[@]}"; do
+            chafa --size="${cols}x9999" "${PATHS[$i]}"
             echo
-        fi
-    done
+        done
+        printf -- '— %d images · scroll up to see all · Enter to close —' "$TOTAL"
+    fi
 }
 
 trap render WINCH
