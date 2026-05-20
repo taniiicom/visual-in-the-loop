@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
-# Entry point: master switch → trigger filter → generate → show.
+# Entry point: master switch -> trigger filter -> generate -> show.
 #
 # Env vars (all optional):
-#   VITL_ENABLED   master switch. Set to 0/false/no/off (case-insensitive) to disable.
-#                  Unset or anything else → enabled.
-#   VITL_TRIGGER   comma-separated allowed triggers (e.g. "plan,clarify") or "all".
-#                  Default: all (always fire).
+#   VITL_ENABLED   master switch. 0/false/no/off (case-insensitive) disables.
+#                  Unset or anything else -> enabled.
+#   VITL_TRIGGER   comma-separated allowed triggers (e.g. "plan,clarify") or
+#                  "all". Default: all.
 #
 # Argv (optional):
 #   --trigger <type>   one of plan / clarify / decision, passed by the agent.
 #                      If omitted, the skill still fires (fail-safe).
 #
-# Stdin:
-#   Either a JSON array of {title, content} objects (or plain strings) for
-#   multi-slide mode, or plain text for single-image mode. See generate.mjs.
+# Stdin: the plain text to visualize (a plan, a question with its options,
+# etc.). It is passed to the model verbatim — pipe the real text, not a
+# rewritten or summarized version of it.
 
 set -u
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -32,7 +32,8 @@ if [ "${1:-}" = "--trigger" ]; then
     shift 2 || shift
 fi
 
-# 3. Trigger filter (only applies when both VITL_TRIGGER is restrictive AND --trigger was passed)
+# 3. Trigger filter (only applies when VITL_TRIGGER is restrictive AND
+#    a --trigger value was passed)
 ALLOWED="$(echo "${VITL_TRIGGER:-all}" | tr '[:upper:]' '[:lower:]')"
 if [ -n "$TRIGGER" ] && [ "$ALLOWED" != "all" ]; then
     if ! echo ",$ALLOWED," | grep -q ",$TRIGGER,"; then
@@ -41,17 +42,14 @@ if [ -n "$TRIGGER" ] && [ "$ALLOWED" != "all" ]; then
     fi
 fi
 
-# 4. Generate (produces 1..N TSV lines: path<TAB>title)
-OUTPUT=$(node "$SCRIPT_DIR/generate.mjs")
+# 4. Generate one image
+IMG=$(node "$SCRIPT_DIR/generate.mjs")
 GEN_STATUS=$?
-if [ $GEN_STATUS -ne 0 ] || [ -z "$OUTPUT" ]; then
+if [ $GEN_STATUS -ne 0 ] || [ -z "$IMG" ] || [ ! -f "$IMG" ]; then
     echo "[visual-in-the-loop] generation failed, continuing without visual" >&2
     exit 0
 fi
 
-# 5. Show (TSV via stdin)
-echo "$OUTPUT" | bash "$SCRIPT_DIR/show.sh" || true
-
-# 6. Summary line for the agent
-COUNT=$(echo "$OUTPUT" | grep -c .)
-echo "[visual-in-the-loop] rendered $COUNT image(s)"
+# 5. Show it
+bash "$SCRIPT_DIR/show.sh" "$IMG" || true
+echo "[visual-in-the-loop] rendered: $IMG"

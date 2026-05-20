@@ -30,25 +30,22 @@ skills/
 
 ## How it behaves
 
-1. Just before the agent asks you to review a plan, it **picks 1–4 things in
-   the plan worth visualizing** (architecture, data flow, UI mockup, phase
-   timeline, etc.) and pipes them as a JSON array into the skill.
-2. The skill calls Gemini 3 Pro Image once per slide and writes each PNG to
-   a temp file.
-3. The skill detects your environment and **renders all images into your view**:
-   - In a **tmux** session with `chafa` installed → single side pane, drawn
-     as real graphics (chafa auto-detects Kitty graphics / sixel). Each slide
-     is shown at full width; as many as fit the pane appear per page and the
-     rest paginate (← / → to page, Enter to close). Re-renders on resize.
-   - In **VS Code / Cursor / Windsurf** → a markdown tab with every title
-     and image embedded.
-   - On **macOS** → `open` with all paths (Preview opens them with a sidebar).
-   - On **Linux** desktop → `xdg-open` per image.
-4. Only **after** the slides are on screen does the agent show the actual
-   question. You decide while looking at the pictures.
+1. Just before the agent asks you to review a plan, it pipes the **actual
+   plan text, verbatim** into the skill.
+2. The skill calls Gemini 3 Pro Image once and writes a single PNG to a temp
+   file — the whole plan rendered as one diagram.
+3. The skill detects your environment and **renders the image into your view**:
+   - In a **tmux** session with `chafa` installed → a side pane, real
+     graphics (chafa auto-detects Kitty graphics / sixel), sized to fit.
+     Enter to close. Re-renders on resize.
+   - In **VS Code / Cursor / Windsurf** → a markdown tab with the image.
+   - On **macOS** → `open` (Preview).
+   - On **Linux** desktop → `xdg-open`.
+4. Only **after** the image is on screen does the agent show the actual
+   question. You decide while looking at the picture.
 
-Trivial plans get a single image (the agent can also pipe plain text and
-the skill treats it as one slide).
+The agent must pipe the real plan text — not a paraphrase of it. The diagram
+is only as good as the text the model receives.
 
 If anything goes wrong (no API key, network down, no display path), the skill
 returns silently and the agent asks the question as usual. It never blocks the

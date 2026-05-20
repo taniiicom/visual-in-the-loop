@@ -1,16 +1,12 @@
 #!/usr/bin/env node
-// Router: read stdin, generate one or more images via the selected provider,
-// save each PNG to $TMPDIR/visual-in-the-loop/, print one TSV line per image
-// to stdout: `<path>\t<title>` (title may be empty).
+// Read the plan text from stdin, generate ONE image of it via the configured
+// provider, save the PNG, and print its path to stdout.
 //
-// Input format on stdin:
-//   - JSON array (detected by leading `[`) of either:
-//       ["content 1", "content 2"]
-//     or
-//       [{"title": "...", "content": "..."}, ...]
-//   - Anything else → treated as a single plain-text content (single image).
+// The whole plan becomes a single diagram. The stdin text is passed to the
+// model verbatim (only wrapped by references/prompt-template.md) — do not
+// pre-summarize or rewrite it upstream; the model needs the real plan.
 //
-// All failures: stderr WARN + exit 1 (run.sh converts to exit 0).
+// All failures: stderr WARN + exit 1 (run.sh converts that to exit 0).
 
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -22,39 +18,15 @@ function fail(msg) {
   process.exit(1);
 }
 
-const stdin = readFileSync(0, "utf-8").trim();
-if (!stdin) fail("empty stdin");
-
-// Normalize input to: [{ title, content }, ...]
-let items;
-if (stdin.startsWith("[")) {
-  let parsed;
-  try {
-    parsed = JSON.parse(stdin);
-  } catch (err) {
-    fail(`stdin looks like JSON but failed to parse: ${err.message}`);
-  }
-  if (!Array.isArray(parsed)) fail("JSON input must be an array");
-  if (parsed.length === 0) fail("JSON array is empty");
-  items = parsed.map((item, idx) => {
-    if (typeof item === "string") return { title: "", content: item };
-    if (item && typeof item === "object") {
-      return { title: item.title ?? "", content: item.content ?? "" };
-    }
-    fail(`item ${idx} is not a string or object`);
-  });
-} else {
-  items = [{ title: "", content: stdin }];
-}
-
-items = items.filter((i) => i.content && i.content.trim());
-if (items.length === 0) fail("no content to render");
+const planText = readFileSync(0, "utf-8").trim();
+if (!planText) fail("empty stdin");
 
 const here = dirname(fileURLToPath(import.meta.url));
 const template = readFileSync(
   join(here, "..", "references", "prompt-template.md"),
   "utf-8",
 );
+const prompt = template.replace("{plan}", planText);
 
 const provider = (process.env.VITL_PROVIDER ?? "gemini").toLowerCase();
 const model = process.env.VITL_MODEL || "";
@@ -66,28 +38,11 @@ try {
   fail(`unknown provider "${provider}": ${err.message}`);
 }
 
+const result = await mod.generate({ prompt, model, env: process.env });
+if (!result.ok) fail(result.error);
+
 const outDir = join(tmpdir(), "visual-in-the-loop");
 mkdirSync(outDir, { recursive: true });
-
-const baseTs = Date.now();
-let successCount = 0;
-
-for (let i = 0; i < items.length; i++) {
-  const { title, content } = items[i];
-  const prompt = template.replace("{plan}", content);
-  const result = await mod.generate({ prompt, model, env: process.env });
-  if (!result.ok) {
-    process.stderr.write(
-      `[visual-in-the-loop] slide ${i + 1}/${items.length} failed: ${result.error}\n`,
-    );
-    continue;
-  }
-  const out = join(outDir, `${baseTs}-${i + 1}.png`);
-  writeFileSync(out, result.png);
-  // Strip tab/newline from title to keep TSV well-formed
-  const safeTitle = (title || "").replace(/[\t\n\r]/g, " ").trim();
-  process.stdout.write(`${out}\t${safeTitle}\n`);
-  successCount++;
-}
-
-if (successCount === 0) process.exit(1);
+const out = join(outDir, `${Date.now()}.png`);
+writeFileSync(out, result.png);
+process.stdout.write(out + "\n");
