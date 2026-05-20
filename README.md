@@ -56,7 +56,7 @@ conversation.
 ### Using the [`skills` CLI][skills-cli] (recommended)
 
 ```bash
-npx skills add taniiicom/skills-visual-in-the-loop
+npx skills add taniiicom/visual-in-the-loop
 ```
 
 This drops the skill into `~/.claude/skills/visual-in-the-loop/` and Claude
@@ -67,8 +67,8 @@ Code picks it up automatically on its next session.
 ### Manual (clone + symlink)
 
 ```bash
-git clone https://github.com/taniiicom/skills-visual-in-the-loop.git
-ln -s "$(pwd)/skills-visual-in-the-loop/skills/visual-in-the-loop" \
+git clone https://github.com/taniiicom/visual-in-the-loop.git
+ln -s "$(pwd)/visual-in-the-loop/skills/visual-in-the-loop" \
       ~/.claude/skills/visual-in-the-loop
 ```
 

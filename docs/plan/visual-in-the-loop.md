@@ -66,7 +66,7 @@ skills-visual-in-the-loop/             (= repo root)
 └── .gitignore                         # (既存) tmp/ ignore 済み
 ```
 
-**判断**: 単一スキル始まりでもデファクトの `skills/<name>/` を採る。`npx skills add owner/skills-visual-in-the-loop --skill visual-in-the-loop` で配布可能になる。
+**判断**: 単一スキル始まりでもデファクトの `skills/<name>/` を採る。`npx skills add owner/visual-in-the-loop --skill visual-in-the-loop` で配布可能になる。
 
 ## 各ファイルの中身
 
@@ -241,7 +241,7 @@ echo "Plan: ..." | bash skills/visual-in-the-loop/scripts/run.sh
 ### 配布検証
 
 ```bash
-npx skills add taniiicom/skills-visual-in-the-loop --skill visual-in-the-loop
+npx skills add taniiicom/visual-in-the-loop --skill visual-in-the-loop
 ```
 
 を別マシン or 別ディレクトリで実行して `~/.claude/skills/visual-in-the-loop/` 配下に展開されること、`generate.mjs` が `node` で動くことを確認。
