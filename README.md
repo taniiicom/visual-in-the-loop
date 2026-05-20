@@ -9,6 +9,8 @@ Gemini 3 Pro Image][nano] — and show it to you — right before it calls
 `ExitPlanMode`, `AskUserQuestion`, or any other "please review and decide"
 moment.
 
+![visual-in-the-loop in a tmux session — the agent's plan on the left, the generated one-page diagram on the right](assets/demo.png)
+
 [skills]: https://code.claude.com/docs/en/skills
 [nano]: https://deepmind.google/models/gemini-image/pro/
 
