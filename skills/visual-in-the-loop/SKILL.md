@@ -121,6 +121,7 @@ in `~/.claude/settings.json` under the `env` key.
 | `VITL_ENABLED` | `1` / `0` (also `true`/`false`/`yes`/`no`/`on`/`off`, case-insensitive) | unset (= enabled) | Master switch. Only disables on `0`/`false`/`no`/`off`; any other value (including unset) is enabled. |
 | `VITL_PROVIDER` | `gemini` / `vertexai` / `openai` / `azure` | `gemini` | Which API to call. |
 | `VITL_MODEL` | provider-specific model id | provider default | E.g. `gemini-2.5-flash-image` for free-tier on Gemini. |
+| `VITL_ASPECT_RATIO` | a `W:H` ratio — `2:3`, `3:4`, `4:5`, `9:16`, `1:1`, `4:3`, `3:2`, `16:9` | `2:3` (portrait) | Shape of the generated image. Gemini / Vertex AI use it directly; OpenAI / Azure map it to the nearest portrait / landscape / square size. |
 | `VITL_DISPLAY` | `auto` / `tmux` / `vscode` / `open` / `none` | `auto` | Force a display path, or `none` to suppress display. Unavailable choices fall back to `auto`. |
 | `VITL_TRIGGER` | comma-separated list (e.g. `plan,clarify`) or `all` | `all` | Restricts which `--trigger <type>` values actually fire generation. |
 

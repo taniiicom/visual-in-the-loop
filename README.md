@@ -117,6 +117,7 @@ Code session:
     "GEMINI_API_KEY": "AIza...",
     "VITL_PROVIDER": "gemini",
     "VITL_MODEL": "gemini-3-pro-image-preview",
+    "VITL_ASPECT_RATIO": "2:3",
     "VITL_DISPLAY": "auto",
     "VITL_TRIGGER": "all"
   }
@@ -133,6 +134,7 @@ For project-only overrides, use the same `env` block in
 | `VITL_ENABLED` | `1` / `0` (and `true`/`false`/`yes`/`no`/`on`/`off`) | unset = on | Master switch. Only `0`/`false`/`no`/`off` disable; everything else stays on. |
 | `VITL_PROVIDER` | `gemini` / `vertexai` / `openai` / `azure` | `gemini` | Which API to call. |
 | `VITL_MODEL` | provider-specific id | provider default | E.g. `gemini-2.5-flash-image` for free-tier Gemini. |
+| `VITL_ASPECT_RATIO` | `W:H` ratio — `2:3`, `3:4`, `4:5`, `9:16`, `1:1`, `4:3`, `3:2`, `16:9` | `2:3` (portrait) | Shape of the generated image. Gemini / Vertex use it directly; OpenAI / Azure map it to the nearest portrait / landscape / square size. |
 | `VITL_DISPLAY` | `auto` / `tmux` / `vscode` / `open` / `none` | `auto` | Force a display path, or `none` to suppress. Unusable choices fall back to `auto`. |
 | `VITL_TRIGGER` | comma-separated (`plan,clarify,decision`) or `all` | `all` | Which `--trigger <type>` invocations actually fire generation. |
 

@@ -10,6 +10,7 @@ export async function generate({ prompt, model, env }) {
   }
 
   const m = model || DEFAULT_MODEL;
+  const aspectRatio = env.VITL_ASPECT_RATIO || "2:3";
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent`;
 
   let resp;
@@ -19,7 +20,10 @@ export async function generate({ prompt, model, env }) {
       headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { responseModalities: ["IMAGE"] },
+        generationConfig: {
+          responseModalities: ["IMAGE"],
+          imageConfig: { aspectRatio },
+        },
       }),
     });
   } catch (err) {

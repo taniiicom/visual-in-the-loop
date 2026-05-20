@@ -46,6 +46,7 @@ export async function generate({ prompt, model, env }) {
   }
 
   const m = model || DEFAULT_MODEL;
+  const aspectRatio = env.VITL_ASPECT_RATIO || "2:3";
   const url =
     `https://${location}-aiplatform.googleapis.com/v1/projects/${project}` +
     `/locations/${location}/publishers/google/models/${m}:generateContent`;
@@ -60,7 +61,10 @@ export async function generate({ prompt, model, env }) {
       },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { responseModalities: ["IMAGE"] },
+        generationConfig: {
+          responseModalities: ["IMAGE"],
+          imageConfig: { aspectRatio },
+        },
       }),
     });
   } catch (err) {

@@ -3,6 +3,13 @@
 
 const DEFAULT_MODEL = "gpt-image-1";
 
+// Map a "W:H" aspect ratio to the nearest gpt-image-1 size.
+function sizeForRatio(ratio) {
+  const [w, h] = (ratio || "2:3").split(":").map(Number);
+  if (!w || !h || w === h) return "1024x1024";
+  return h > w ? "1024x1536" : "1536x1024";
+}
+
 export async function generate({ prompt, model, env }) {
   const apiKey = env.OPENAI_API_KEY;
   if (!apiKey) {
@@ -24,7 +31,7 @@ export async function generate({ prompt, model, env }) {
         model: m,
         prompt,
         n: 1,
-        size: "1024x1024",
+        size: sizeForRatio(env.VITL_ASPECT_RATIO),
       }),
     });
   } catch (err) {

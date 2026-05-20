@@ -12,6 +12,13 @@
 
 const DEFAULT_API_VERSION = "2024-10-21";
 
+// Map a "W:H" aspect ratio to the nearest gpt-image size.
+function sizeForRatio(ratio) {
+  const [w, h] = (ratio || "2:3").split(":").map(Number);
+  if (!w || !h || w === h) return "1024x1024";
+  return h > w ? "1024x1536" : "1536x1024";
+}
+
 export async function generate({ prompt, env }) {
   const apiKey = env.AZURE_OPENAI_API_KEY;
   const endpoint = env.AZURE_OPENAI_ENDPOINT;
@@ -36,7 +43,7 @@ export async function generate({ prompt, env }) {
       body: JSON.stringify({
         prompt,
         n: 1,
-        size: "1024x1024",
+        size: sizeForRatio(env.VITL_ASPECT_RATIO),
       }),
     });
   } catch (err) {
