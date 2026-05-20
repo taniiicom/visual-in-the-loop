@@ -35,17 +35,36 @@ fix, etc.) you can skip. Default to **invoking the skill**.
 
 ## How to use
 
-**Step 1 — decide what to visualize.** Before running the skill, *pause and
-think*: "What 1–4 separate visuals would let the user grasp this plan at a
-glance?" A typical plan deserves a small set of slides, e.g.:
+**Step 1 — decide what to visualize.** What belongs in the visuals depends on
+what you are about to do. **This is the most important step — get it right.**
 
-- the overall architecture / components
-- the data or control flow
-- a UI mockup or screen layout
-- a phase / step timeline
+**Before `ExitPlanMode` (presenting a plan):** visualize the plan itself.
+Pick the 1–4 views that make it graspable at a glance, e.g. the architecture /
+components, the data or control flow, a UI mockup, a phase timeline.
 
-Pick the ones that actually help. Trivial plans need just one slide. Don't
-manufacture slides for the sake of count.
+**Before `AskUserQuestion` (asking the user to choose):** visualize the
+**decision**, NOT the surrounding plan. The image must be a **side-by-side
+comparison of the exact options you are about to offer the user**. In the
+slide `content`, name each option, describe what it is and its tradeoffs, and
+explicitly ask for a comparison graphic. This is usually a single slide.
+
+> Example — you are about to call `AskUserQuestion` asking "Which LLM
+> backend?" with options Server-LLM / On-device / Hybrid. Do **NOT** visualize
+> the system architecture. Visualize the **choice**:
+>
+> ```json
+> [{
+>   "title": "LLM backend — option comparison",
+>   "content": "A side-by-side comparison graphic of three options for the ghostwriting LLM backend. Option A, Server LLM: highest quality, full context length, requires a network connection. Option B, On-device Foundation Models: private and low-latency, but quality depends on the device's model. Option C, Hybrid auto-switch: routes each request by use case, most complex to build. Lay the three out side by side and contrast their tradeoffs — quality, privacy, latency, build cost."
+> }]
+> ```
+>
+> The user should be able to look at this image and the answer buttons
+> together and decide. If the question carries A/B/C options, the visual is a
+> comparison of A vs B vs C — always.
+
+Pick only the visuals that actually help. Trivial moments need just one slide —
+don't manufacture slides for the sake of count.
 
 **Step 2 — pass them as a JSON array on stdin.** Each item is
 `{title, content}`; `content` is what Gemini will visualize, `title` is
@@ -149,6 +168,9 @@ in `~/.claude/settings.json` under the `env` key.
 
 ## Do NOT
 
+- **Do NOT** visualize the plan / architecture when the moment is a question.
+  Before `AskUserQuestion`, the visual must compare the answer options the
+  user is choosing between — see Step 1.
 - **Do NOT** fall back to a Mermaid / ASCII / textual description of the
   diagram. The whole point is to use Nano Banana Pro's open-ended generation.
 - **Do NOT** call `AskUserQuestion` or `ExitPlanMode` first and then run this
