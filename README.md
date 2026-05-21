@@ -1,18 +1,16 @@
-# Visual-in-the-Loop Skills
+# [Agent Skills][skills]: _Visual-in-the-Loop_
 
-> Hand humans a picture — not a wall of text — when an agent asks for a decision.
+> Hand humans a visual — not a wall of text — when an agent asks for a decision.
 
-A Claude Code [Agent Skill][skills]. Plan agents (plan mode, Codex, spec-kit)
-produce plans that are slow to review as text. This skill makes the agent
-generate a single **1-page diagram** of the plan with [Nano Banana Pro /
-Gemini 3 Pro Image][nano] — and show it to you — right before it calls
-`ExitPlanMode`, `AskUserQuestion`, or any other "please review and decide"
-moment.
+Claude Code, Codex, and spec-kit produce wall-of-text plans. This skill makes
+the agent turn that plan into a single **1-page visual summary** with
+[Nano Banana 2][nano] — and show it to you — right before it calls
+`ExitPlanMode` or `AskUserQuestion`.
 
 ![visual-in-the-loop in a tmux session — the agent's plan on the left, the generated one-page diagram on the right](assets/demo.png)
 
 [skills]: https://code.claude.com/docs/en/skills
-[nano]: https://deepmind.google/models/gemini-image/pro/
+[nano]: https://deepmind.google/models/gemini-image
 
 ## Installation
 
