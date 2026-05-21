@@ -1,5 +1,7 @@
 # [Agent Skills][skills]: _Visual-in-the-Loop_
 
+**English** | [日本語](README.ja.md)
+
 > Hand humans a visual — not a wall of text — when an agent asks for a decision.
 
 Claude Code, Codex, and spec-kit produce wall-of-text plans. This skill makes
